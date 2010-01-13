@@ -2,10 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Category(models.Model):
-	description = models.CharField(max_length=200)
+        user = models.ForeignKey(User)
+	name = models.CharField(max_length=20)
+        description = models.CharField(max_length=200)
 	color = models.CharField(max_length=6)
 	def __unicode__(self):
-		return self.description
+		return self.user.__str__() + "'s " + self.name
 
 class Event(models.Model):
         user = models.ForeignKey(User)
@@ -13,4 +15,9 @@ class Event(models.Model):
 	begin = models.DateTimeField()
 	end = models.DateTimeField()
 	def __unicode__(self):
-		return self.timestamp.__str__() + " -> " + self.state.__str__()
+		return self.user.__str__() + ": " + self.category.name + " (" + self.begin.__str__() + " - " + self.end.__str__() + ")"
+
+class EventUnfinished(models.Model):
+        user = models.ForeignKey(User)
+        category = models.ForeignKey(Category)
+        begin = models.DateTimeField()
