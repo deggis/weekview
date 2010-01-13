@@ -1,0 +1,21 @@
+INSTALLATION:
+
+WEEKVIEW is a Django application, so as a home it needs a Django project.
+Installing this to Django site from scratch can be done like this:
+
+1. django-admin.py startproject [mysite]
+    * This creates [mysite] folder + Django stuff.
+
+2. Put weekview under [mysite] folder.
+
+3. Edit your [mysite]/settings.py
+    * Fix database settings
+    * Add '[mysite].weekview' to INSTALLED_APPS
+
+4. Edit then [mysite]/urls.py
+    * Add row:
+        (r'^weekview/', include('[mysite].weekview.urls')),
+
+5. At [mysite] run 'python manage.py syncdb'
+
+
