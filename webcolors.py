@@ -1,3 +1,6 @@
+# Obtained from http://pypi.python.org/pypi/webcolors/
+# To be removed from Weekview package.
+
 """
 A simple library for working with the color names and color codes
 defined by the HTML and CSS specifications.

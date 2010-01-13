@@ -3,6 +3,9 @@ INSTALLATION:
 WEEKVIEW is a Django application, so as a home it needs a Django project.
 Installing this to Django site from scratch can be done like this:
 
+0. Get Django ( http://www.djangoproject.com/ ) to your healthy, Python enabled
+   environment.
+
 1. django-admin.py startproject [mysite]
     * This creates [mysite] folder + Django stuff.
 
@@ -18,4 +21,13 @@ Installing this to Django site from scratch can be done like this:
 
 5. At [mysite] run 'python manage.py syncdb'
 
+That's it.
 
+--
+
+Test server for trying out the site can be launched at [mysite] with
+'python manage.py runserver'. Point your browser to
+    http://test-server-address[:port]/weekview/
+
+For further deploying info, see:
+http://docs.djangoproject.com/en/dev/howto/deployment/
