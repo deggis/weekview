@@ -1,22 +1,13 @@
-<html>
-<head>
-<title>Week in view</title>
-<style type="text/css">
-	body {
-		background-color: #000;
-		color: #88f;
-		font-family: Tahoma, Georgia;
-	}
-</style>
-</head>
-<body>
-<center>
-	<h1>Week {{week}}</h1>
-	<p>
-		<a href="?week={{prevWeek}}">&lt;&lt; Back to week {{prevWeek}}</a> 
-		<a href="?week={{nextWeek}}">Forward to week {{nextWeek}} &gt;&gt;</a> 
-	</p>
-	<img src="../image/?week={{week}}" alt="Graphista" />
-</center>
-</body>
-</html>
+{% extends "views/base.html" %}
+
+{% block title %}Week {{week}}{% endblock %}
+
+{% block content %}
+  <h2>Week {{week}}</h2>
+  <img src="../image/?week={{week}}&x=780&y=400" align="middle" alt="Graphista" />
+  <hr />
+  <p style="text-align: center; margin-top:0em;">
+    <a href="?week={{prevWeek}}">&lt;&lt; Back to week {{prevWeek}}</a>&nbsp;|&nbsp;
+    <a href="?week={{nextWeek}}">Forward to week {{nextWeek}} &gt;&gt;</a> 
+  </p>
+{% endblock %}

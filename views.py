@@ -7,22 +7,16 @@ import webcolors
 from django.contrib.auth.decorators import login_required
 
 def getweek(begintime, endtime):
-	return Transition.objects.filter(timestamp__gte=begintime,timestamp__lte=endtime).order_by('timestamp')
+	return Event.objects.filter(begin__gte=begintime,end__lte=endtime).order_by('begin')
 
 def getdays():
 	return (begintime, endtime)
-
 
 def drawtext(draw, text_pos, text):
 	red = (180,180,180)
 	draw.text(text_pos, text, fill=red)
 
-
-def assign_to_day(event, begindate):
-#	slots = {26:0, 27:1, 28:2, 29:3, 30:4, 31:5, 1:6}
-#	print begindate
-#	print slots[begindate.day]
-#	return slots[begindate.day]
+def assignToDay(event, begindate):
 	return begindate.weekday()
 
 weekdays = ['MA','TI','KE','TO','PE','LA','SU']
@@ -31,24 +25,24 @@ padding_top = 50
 def_height = 700
 def_width = 1100
 
-def evaluate_height(available_height, t):
+def evaluateHeight(available_height, t):
 	secs_in_event = (60*60*t.hour) + (60*t.minute) + (t.second)
 	return available_height * (secs_in_event*1.0/secs_in_day)
 
 def drawEvent(draw, height, width, event, begintime):
 	blue = (0,0,255)
-	day = assign_to_day(event, event.timestamp.date())
+	day = assignToDay(event, event.timestamp.date())
 	slot_width = width/7
-	top = padding_top + evaluate_height((height-padding_top), event.timestamp.time())
+	top = padding_top + evaluateHeight((height-padding_top), event.begin.time())
 	bottom = height
 	left = day*slot_width
 	right = left+slot_width
 	box = [left,top,right,bottom]
-	draw.rectangle(box, fill=webcolors.hex_to_rgb('#'+event.state.color))
+	draw.rectangle(box, fill=webcolors.hex_to_rgb('#'+event.category.color))
 
 	# Prepare for overnight happening
 	draw.rectangle([left+slot_width, padding_top, right+slot_width, height], fill=webcolors.hex_to_rgb('#'+event.state.color))
-	text = event.state.description + ' ' + event.timestamp.time().strftime('%H:%M')
+	text = event.category.description + ' ' + event.begin.time().strftime('%H:%M')
 	drawtext(draw, (left+10,top+3), text)
 	print "Tulostettiin transitio: %s" % event
 	print "\tlaatikkoon %s" % box
@@ -75,7 +69,7 @@ def drawGuideLines(draw, height, width):
 	heratys = (time(6,50,tzinfo=None), blue)
 	viivat = [heratys,toihin,toista,nukkumaan]
 	for viiva in viivat:
-		korkeus = evaluate_height(height-padding_top, viiva[0])+padding_top
+		korkeus = evaluateHeight(height-padding_top, viiva[0])+padding_top
 		draw.line((0, korkeus, width, korkeus), fill=viiva[1])
 
 def image(request):
@@ -118,6 +112,7 @@ def week(request):
 	week = getWeekFromRequest(request)
 	t = loader.get_template('views/week.html')
 	c = Context({
+		'user': 'deggis',
 		'week': week,
 		'prevweek': (week-1),
 		'nextweek': (week+1),

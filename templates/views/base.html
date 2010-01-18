@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link rel="stylesheet" href="/weekview/media/style.css" />
+    <title>Weekgraph | {% block title %}Error{% endblock %}</title>
+</head>
+
+<body>
+
+  <div id="sidebar">
+    <h2 id="user">{{user}}'s</h2>
+    <h2 id="title">Weekgraph</h2>
+    <ul class="mainmenu1">
+      <li><strong>View</strong>
+        <ul class="mainmenu2">
+          <li><a href='week/'>graphs of weeks</a></li>
+          <li><a href='statistics/'>statistics of events</a></li>
+        </ul>
+      </li>
+      <li><strong>Add/modify</strong>
+        <ul class="mainmenu2">
+          <li><a href='events/'>events</a></li>
+          <li><a href='categories/'>categories</a></li>
+        </ul>
+      </li>
+    </ul>
+    <a href='logout/'>Logout</a>
+
+  </div>
+
+  <div id="content">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
