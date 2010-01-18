@@ -57,7 +57,7 @@ def getWeekFromRequest(request):
 		return week, year
 
 def solveFirstDayOfWeek(week, year):
-        t = time.strptime('2010 3 1', '%Y %W %w')
+        t = time.strptime('%s %s 1' % (year, week), '%Y %W %w')
 	return t.tm_mday, t.tm_mon
 
 def getDimensionsFromRequest(request):
@@ -109,15 +109,20 @@ image = login_required(image)
 def index(request):
 	t = loader.get_template('views/index.html')
 	c = Context({
+                'base': solveBase(),
 		'user': 'deggis',
 	})
 	return HttpResponse(t.render(c))
 index = login_required(index)
 
+def solveBase():
+	return 'http://cameron:8080/weekview' # FIXME
+
 def week(request):
 	week, year = getWeekFromRequest(request)
 	t = loader.get_template('views/week.html')
 	c = Context({
+                'base': solveBase(),
 		'user': 'deggis',
 		'week': week,
                 'year': year,
