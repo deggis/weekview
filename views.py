@@ -2,11 +2,12 @@ from django.http import HttpResponse
 from django.template import Context, loader
 from models import Event, EventCategory
 import datetime
-from datetime import time
+import time
+from datetime import date
 import webcolors
 from django.contrib.auth.decorators import login_required
 
-def getweek(begintime, endtime):
+def getEvents(begintime, endtime):
 	return Event.objects.filter(begin__gte=begintime,end__lte=endtime).order_by('begin')
 
 def getdays():
@@ -48,10 +49,16 @@ def drawEvent(draw, height, width, event, begintime):
 	print "\tlaatikkoon %s" % box
 
 def getWeekFromRequest(request):
-	if request.GET.__contains__("week"):
-		return int(request.GET["week"])
+	if request.GET.__contains__("week") & request.GET.__contains__("year"):
+		return int(request.GET["week"]), int(request.GET["year"])
 	else:
-		return 45
+                week = int(date.today().strftime("%W"))+1 # FIXME: Don't know why +1 is needed here, IDLE says otherwise
+                year = int(date.today().strftime("%Y"))
+		return week, year
+
+def solveFirstDayOfWeek(week, year):
+        t = time.strptime('2010 3 1', '%Y %W %w')
+	return t.tm_mday, t.tm_mon
 
 def getDimensionsFromRequest(request):
 	try:
@@ -63,32 +70,31 @@ def getDimensionsFromRequest(request):
 def drawGuideLines(draw, height, width):
 	red = (255,0,0)
 	blue = (0,0,255)
-	toihin = (time(8,0,0, tzinfo=None), red)
-	toista = (time(16,0,0, tzinfo=None), red)
-	nukkumaan = (time(22,30, tzinfo=None), blue)
-	heratys = (time(6,50,tzinfo=None), blue)
+	toihin = (datetime.time(8,0,0, tzinfo=None), red)
+	toista = (datetime.time(16,0,0, tzinfo=None), red)
+	nukkumaan = (datetime.time(22,30, tzinfo=None), blue)
+	heratys = (datetime.time(6,50,tzinfo=None), blue)
 	viivat = [heratys,toihin,toista,nukkumaan]
 	for viiva in viivat:
 		korkeus = evaluateHeight(height-padding_top, viiva[0])+padding_top
 		draw.line((0, korkeus, width, korkeus), fill=viiva[1])
 
 def image(request):
-	week = getWeekFromRequest(request)
+	week, year = getWeekFromRequest(request)
 	width, height = getDimensionsFromRequest(request)
-	print "Aloitetaan kuva"
 	import Image, ImageDraw 
 	size = (width,height)
 	im = Image.new('RGB', size)
 	draw = ImageDraw.Draw(im)
 
-	begintime = datetime.date(2009, 1, 1)
-	begintime = begintime + datetime.timedelta(days=-begintime.weekday(), weeks=week)
+        tday,tmonth = solveFirstDayOfWeek(week, year)
+	begintime = datetime.date(year, tmonth, tday)
 	endtime = begintime + datetime.timedelta(weeks=1)
 	for i in range(7):
 		day = begintime + datetime.timedelta(days=i)
 		drawtext(draw, (10+(width/7*i), 10), "%s %s.%s." % (weekdays[i], day.day, day.month))
 
-	events = getweek(begintime, endtime)
+	events = getEvents(begintime, endtime)
 	for event in events:
 		drawEvent(draw, height, width, event, begintime)
 
@@ -109,13 +115,14 @@ def index(request):
 index = login_required(index)
 
 def week(request):
-	week = getWeekFromRequest(request)
+	week, year = getWeekFromRequest(request)
 	t = loader.get_template('views/week.html')
 	c = Context({
 		'user': 'deggis',
 		'week': week,
-		'prevweek': (week-1),
-		'nextweek': (week+1),
+                'year': year,
+		'prevWeek': (week-1),
+		'nextWeek': (week+1),
 	})
 	return HttpResponse(t.render(c))
 week = login_required(week)
