@@ -21,3 +21,5 @@ class EventUnfinished(models.Model):
         user = models.ForeignKey(User)
         category = models.ForeignKey(EventCategory)
         begin = models.DateTimeField()
+        def __unicode__(self):
+		return self.user.__str__() + "'s " + self.category.name + " (started at " + self.begin.__str__() + ")"

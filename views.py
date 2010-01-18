@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.template import Context, loader
-from models import Event, EventCategory
+from models import *
 import datetime
 import time
 from datetime import date
@@ -32,17 +32,18 @@ def evaluateHeight(available_height, t):
 
 def drawEvent(draw, height, width, event, begintime):
 	blue = (0,0,255)
-	day = assignToDay(event, event.timestamp.date())
+	day = assignToDay(event, event.begin.date())
 	slot_width = width/7
 	top = padding_top + evaluateHeight((height-padding_top), event.begin.time())
-	bottom = height
+	#bottom = height
+        bottom = padding_top + evaluateHeight((height-padding_top), event.end.time())
 	left = day*slot_width
 	right = left+slot_width
 	box = [left,top,right,bottom]
 	draw.rectangle(box, fill=webcolors.hex_to_rgb('#'+event.category.color))
 
 	# Prepare for overnight happening
-	draw.rectangle([left+slot_width, padding_top, right+slot_width, height], fill=webcolors.hex_to_rgb('#'+event.state.color))
+	# draw.rectangle([left+slot_width, padding_top, right+slot_width, height], fill=webcolors.hex_to_rgb('#'+event.category.color))
 	text = event.category.description + ' ' + event.begin.time().strftime('%H:%M')
 	drawtext(draw, (left+10,top+3), text)
 	print "Tulostettiin transitio: %s" % event
@@ -52,7 +53,7 @@ def getWeekFromRequest(request):
 	if request.GET.__contains__("week") & request.GET.__contains__("year"):
 		return int(request.GET["week"]), int(request.GET["year"])
 	else:
-                week = int(date.today().strftime("%W"))+1 # FIXME: Don't know why +1 is needed here, IDLE says otherwise
+                week = int(date.today().strftime("%W"))
                 year = int(date.today().strftime("%Y"))
 		return week, year
 
@@ -131,3 +132,64 @@ def week(request):
 	})
 	return HttpResponse(t.render(c))
 week = login_required(week)
+
+class CategoryButton:
+	def __init__(self, category, enabled):
+		self.category = category
+		self.disabled = not enabled
+
+def showButtons(request):
+	categories = EventCategory.objects.filter(user=request.user).order_by('name')
+	unfinished = EventUnfinished.objects.filter(user=request.user)
+	if len(unfinished) == 1:
+		active_cat = unfinished[0].category
+	else:
+		active_cat = None
+
+	buttons = []
+	for cat in categories:
+		if cat == active_cat:
+			state = False
+		else:
+			state = True # :)
+		buttons.append(CategoryButton(cat, state))
+	t = loader.get_template('views/buttons.html')
+	c = Context({
+                'base': solveBase(),
+		'user': 'deggis',
+		'buttons': buttons,
+		'clear_disabled': active_cat == None,
+	})
+	return HttpResponse(t.render(c))
+showButtons = login_required(showButtons)
+
+def registerButton(request):
+	unfinisheds = EventUnfinished.objects.filter(user=request.user)
+	if request.POST["button"] == "Clear":
+		tmp = unfinisheds[0]
+		e = Event()
+		e.user = tmp.user
+		e.category = tmp.category
+		e.begin = tmp.begin
+		e.end = datetime.datetime.now()+datetime.timedelta(hours=10)
+		e.save()
+		tmp.delete()
+		return HttpResponse("rekistered: " + e.__str__())
+	else:
+		if len(unfinisheds) == 1:
+			tmp = unfinisheds[0]
+			e = Event()
+			e.user = tmp.user
+			e.category = tmp.category
+			e.begin = tmp.begin
+			e.end = datetime.datetime.now()+datetime.timedelta(hours=10)
+			e.save()
+			tmp.delete()
+		new = EventUnfinished()
+		new.user = request.user
+		new.category = EventCategory.objects.filter(name=request.POST["button"])[0]
+		new.begin = datetime.datetime.now()+datetime.timedelta(hours=10)
+		new.save()
+		return HttpResponse("registered: " + new.__str__())
+
+registerButton = login_required(registerButton)

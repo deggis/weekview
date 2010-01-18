@@ -1,0 +1,27 @@
+{% extends "views/base.html" %}
+
+{% block title %}Buttons{% endblock %}
+
+{% block content %}
+<h2>Buttons</h2>
+
+<form action="{{base}}/buttons/register" method="post">
+
+<fieldset>
+<legend>The remote control</legend>
+{% for button in buttons %}
+<input type="submit" name="button" value="{{button.category.name}}" id="{{button.category.name}}"
+{% if button.disabled %} disabled="disabled" {% endif %}
+/>
+<label for="{{button.category.name}}">{{button.category.description}}</label>
+<br />
+{% endfor %}
+<input type="submit" name="button" value="Clear" id="clear"
+{% if clear_disabled %} disabled="disabled" {% endif %}
+ />
+<label for="clear">Stops ongoing event.</label>
+
+</fieldset>
+</form>
+
+{% endblock %}
