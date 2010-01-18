@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class Category(models.Model):
+class EventCategory(models.Model):
         user = models.ForeignKey(User)
 	name = models.CharField(max_length=20)
         description = models.CharField(max_length=200)
@@ -11,7 +11,7 @@ class Category(models.Model):
 
 class Event(models.Model):
         user = models.ForeignKey(User)
-	category = models.ForeignKey(Category)
+	category = models.ForeignKey(EventCategory)
 	begin = models.DateTimeField()
 	end = models.DateTimeField()
 	def __unicode__(self):
@@ -19,5 +19,5 @@ class Event(models.Model):
 
 class EventUnfinished(models.Model):
         user = models.ForeignKey(User)
-        category = models.ForeignKey(Category)
+        category = models.ForeignKey(EventCategory)
         begin = models.DateTimeField()

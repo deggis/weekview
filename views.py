@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.template import Context, loader
-from models import Transition, State
+from models import Event, EventCategory
 import datetime
 from datetime import time
 import webcolors
@@ -18,7 +18,7 @@ def drawtext(draw, text_pos, text):
 	draw.text(text_pos, text, fill=red)
 
 
-def assign_to_day(transition, begindate):
+def assign_to_day(event, begindate):
 #	slots = {26:0, 27:1, 28:2, 29:3, 30:4, 31:5, 1:6}
 #	print begindate
 #	print slots[begindate.day]
@@ -35,22 +35,22 @@ def evaluate_height(available_height, t):
 	secs_in_event = (60*60*t.hour) + (60*t.minute) + (t.second)
 	return available_height * (secs_in_event*1.0/secs_in_day)
 
-def drawtransition(draw, height, width, transition, begintime):
+def drawEvent(draw, height, width, event, begintime):
 	blue = (0,0,255)
-	day = assign_to_day(transition, transition.timestamp.date())
+	day = assign_to_day(event, event.timestamp.date())
 	slot_width = width/7
-	top = padding_top + evaluate_height((height-padding_top), transition.timestamp.time())
+	top = padding_top + evaluate_height((height-padding_top), event.timestamp.time())
 	bottom = height
 	left = day*slot_width
 	right = left+slot_width
 	box = [left,top,right,bottom]
-	draw.rectangle(box, fill=webcolors.hex_to_rgb('#'+transition.state.color))
+	draw.rectangle(box, fill=webcolors.hex_to_rgb('#'+event.state.color))
 
 	# Prepare for overnight happening
-	draw.rectangle([left+slot_width, padding_top, right+slot_width, height], fill=webcolors.hex_to_rgb('#'+transition.state.color))
-	text = transition.state.description + ' ' + transition.timestamp.time().strftime('%H:%M')
+	draw.rectangle([left+slot_width, padding_top, right+slot_width, height], fill=webcolors.hex_to_rgb('#'+event.state.color))
+	text = event.state.description + ' ' + event.timestamp.time().strftime('%H:%M')
 	drawtext(draw, (left+10,top+3), text)
-	print "Tulostettiin transitio: %s" % transition
+	print "Tulostettiin transitio: %s" % event
 	print "\tlaatikkoon %s" % box
 
 def getWeekFromRequest(request):
@@ -94,16 +94,15 @@ def image(request):
 		day = begintime + datetime.timedelta(days=i)
 		drawtext(draw, (10+(width/7*i), 10), "%s %s.%s." % (weekdays[i], day.day, day.month))
 
-	transitions = getweek(begintime, endtime)
-	for transition in transitions:
-		drawtransition(draw, height, width, transition, begintime)
+	events = getweek(begintime, endtime)
+	for event in events:
+		drawEvent(draw, height, width, event, begintime)
 
 	drawGuideLines(draw, height, width)
 
 	response = HttpResponse(mimetype="image/png")
 	del draw
 	im.save(response, 'PNG')
-	print "Kuva piirretty responseen, valmis"
 	return response
 image = login_required(image)
 

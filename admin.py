@@ -1,5 +1,5 @@
-from models import State, Transition
+from models import Event, EventCategory
 from django.contrib import admin
 
-admin.site.register(State)
-admin.site.register(Transition)
+admin.site.register(Event)
+admin.site.register(EventCategory)
