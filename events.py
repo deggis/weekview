@@ -2,6 +2,9 @@ from models import *
 import datetime
 import time
 
+"""Provides methods for accessing events in database, tools
+for handling them and the calendar logic."""
+
 class DrawableEvent:
 	def __init__(self, user, category, begin, end):
 		self.user = user

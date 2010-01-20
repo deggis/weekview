@@ -3,11 +3,18 @@ import datetime
 import time
 from events import *
 
+
+"""Tools for drawing pictures. Uses Python Imaging Library."""
+
 weekdays = ['MA','TI','KE','TO','PE','LA','SU']
 secs_in_day = 24*60*60
 padding_top = 50
 
 def drawImage(week, year, width=800, height=600):
+	"""Returns PNG image of week of the requested user."""
+
+	# FIXME: User should be specified :D
+
 	import Image, ImageDraw 
 	size = (width,height)
 	im = Image.new('RGB', size)
@@ -34,6 +41,9 @@ def evaluateHeight(available_height, t):
 	return available_height * (secs_in_event*1.0/secs_in_day)
 
 def drawGuideLines(draw, height, width):
+	"""Because having image top as 00:00 and bottom as 23:59 isn't natural,
+	some guide lines are useful."""
+
 	red = (255,0,0)
 	blue = (0,0,255)
 	toihin = (datetime.time(8,0,0, tzinfo=None), red)

@@ -6,10 +6,27 @@ from datetime import date
 import imaging
 from django.contrib.auth.decorators import login_required
 
+"""Views for Weekview django application. Provides UI's and images from
+HTTP requests."""
+
 def solveBase():
 	return django.root + '/weekview' # XXX: Get app name from smwhere else.
 
+def index(request):
+	"""Displays "home page" of the application."""
+
+	t = loader.get_template('views/index.html')
+	c = Context({
+                'base': solveBase(),
+		'user': 'deggis',
+	})
+	return HttpResponse(t.render(c))
+index = login_required(index)
+
 def image(request):
+	"""Returns PNG image as HTTP response. Uses default values in none
+	provided."""
+
 	week, year = getWeekFromRequest(request)
 	width, height = getDimensionsFromRequest(request)
 	image = imaging.drawImage(week, year, width, height)
@@ -18,6 +35,7 @@ def image(request):
 	image.save(response, 'PNG')
 	return response
 image = login_required(image)
+
 
 def getWeekFromRequest(request):
 	if request.GET.__contains__("week") & request.GET.__contains__("year"):
@@ -32,16 +50,6 @@ def getDimensionsFromRequest(request):
 		return (int(request.GET["x"]), int(request.GET["y"]))
 	except:
 		return (def_width, def_height)
-
-
-def index(request):
-	t = loader.get_template('views/index.html')
-	c = Context({
-                'base': solveBase(),
-		'user': 'deggis',
-	})
-	return HttpResponse(t.render(c))
-index = login_required(index)
 
 def week(request):
 	week, year = getWeekFromRequest(request)
