@@ -64,7 +64,8 @@ def drawEvent(draw, height, width, event, begintime):
 	draw.rectangle(box, fill=webcolors.hex_to_rgb('#'+event.category.color))
 
 	text = event.begin.time().strftime('%H:%M') + ' ' + event.category.name
-	drawText(draw, (box[0],box[1]+3), text)
+	if event.split_tail is False:
+		drawText(draw, (box[0],box[1]+3), text)
 
 def solveBoxCorners(event, height, width):
 	slot_width = width/7
