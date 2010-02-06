@@ -23,7 +23,7 @@ def draw_image(user, week, year, width=800, height=600):
 	endtime = begintime + datetime.timedelta(weeks=1)
 	for i in range(7):
 		day = begintime + datetime.timedelta(days=i)
-		draw_text(draw, (10+(width/7*i), 10), "%s %s.%s." % (weekdays[i], day.day, day.month))
+		draw_text(draw, (5+(width/7*i), 10), "%s %s.%s." % (weekdays[i], day.day, day.month))
 
 	events = get_events(begintime, endtime, user)
 	for event in events:
@@ -70,7 +70,7 @@ def solve_box_corners(event, height, width):
 	top = padding_top + evaluate_height((height-padding_top), event.begin.time())
         bottom = padding_top + evaluate_height((height-padding_top), event.end.time())
 
-	day = assign_to_day(event, event.begin.date())
+	day = assign_to_day(event)
 	left = day*slot_width
 	right = left+slot_width
 
