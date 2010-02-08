@@ -23,6 +23,15 @@ Installing this to Django site from scratch can be done like this:
 
 That's it.
 
+
+
+
+Troubleshooting:
+
+ * If Django complains about attribute error on django.root,
+   add "import django; django.root = ''" or other relative path
+   to your Django project instance, i.e. "/django"
+
 --
 
 Test server for trying out the site can be launched at [mysite] with
