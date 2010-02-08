@@ -18,7 +18,7 @@ def index(request):
 	t = loader.get_template('views/index.html')
 	c = Context({
                 'base': solve_base(),
-		'user': 'deggis',
+		'user': request.user,
 	})
 	return HttpResponse(t.render(c))
 index = login_required(index)

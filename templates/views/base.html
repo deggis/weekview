@@ -7,30 +7,37 @@
 </head>
 
 <body>
-
-  <div id="sidebar">
+  <div id="header">
     <h2 id="user">{{user}}'s</h2>
     <h2 id="title">Weekgraph</h2>
-    <ul class="mainmenu1">
-      <li><strong>View</strong>
-        <ul class="mainmenu2">
-          <li><a href='{{base}}/week/'>graphs of weeks</a></li>
-          <li><a href='{{base}}/statistics/'>statistics of events</a></li>
-        </ul>
-      </li>
-      <li><strong>Add/modify</strong>
-        <ul class="mainmenu2">
-          <li><a href='{{base}}/buttons/'>the buttons</a></li>
-          <li><a href='{{base}}/categories/'>categories</a></li>
-        </ul>
-      </li>
-    </ul>
-    <a href='{{base}}/logout/'>Logout</a>
-
   </div>
 
-  <div id="content">
-    {% block content %}{% endblock %}
+  <div id="container">
+      <div id="sidebar">
+          <ul class="mainmenu1">
+          <li><strong>Input</strong>
+            <ul class="mainmenu2">
+              <li><a href='{{base}}/buttons/'>the buttons</a></li>
+            </ul>
+          </li>
+          <li><strong>Output</strong>
+            <ul class="mainmenu2">
+              <li><a href='{{base}}/week/'>graphs of weeks</a></li>
+              <li><a href='{{base}}/statistics/'>statistics of events</a></li>
+            </ul>
+          </li>
+          <li><strong>Setup</strong>
+            <ul class="mainmenu2">
+              <li><a href='{{base}}/categories/'>categories</a></li>
+            </ul>
+          </li>
+        </ul>
+        <a href='{{base}}/logout/'>Logout</a>
+
+      </div>
+      <div id="content">
+        {% block content %}{% endblock %}
+      </div>
   </div>
 </body>
 </html>
