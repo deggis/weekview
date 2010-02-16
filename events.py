@@ -6,26 +6,26 @@ import time
 """Provides methods for accessing events in database, tools
 for handling them and the calendar logic."""
 
-class DrawableEvent:
-    def __init__(self, user, category, begin, end):
-        self.user = user
-        self.category = category
-        self.begin = begin
-        self.end = end
-        self.split_tail = False
-    def __unicode__(self):
-        return "%s event (%s - %s)" % (self.category,self.begin,self.end)
-
-    def __str__(self):
-        return self.__unicode__()
-
 def split_event(e):
     dayend = datetime.datetime(e.begin.year, e.begin.month, e.begin.day, 23, 59, 59)
     daybegin = datetime.datetime(e.end.year, e.end.month, e.end.day, 0, 0, 0)
-    event1 = DrawableEvent(e.user, e.category, e.begin, dayend)
-    event2 = DrawableEvent(e.user, e.category, daybegin, e.end)
+    event1 = clone_event(e)
+    event2 = clone_event(e)
+    event1.end = dayend
+    event2.begin = daybegin
     event2.split_tail = True
     return event1, event2
+
+def clone_event(event):
+    e = Event()
+    e.user = event.user
+    e.category = event.category
+    e.description = event.description
+    e.begin = event.begin
+    e.end = event.end
+    e.split_tail = False
+    e.save = None # These event ARE not for saving
+    return e
 
 # Get events + split overnight events to two events
 def get_events(begintime, endtime, req_user, req_category=None):
@@ -35,7 +35,7 @@ def get_events(begintime, endtime, req_user, req_category=None):
     else:
         dbevents = Event.objects.filter(begin__gte=begintime,begin__lte=endtime,user=req_user).order_by('begin')
     for dbe in dbevents:
-        event = DrawableEvent(dbe.user, dbe.category, dbe.begin, dbe.end)
+        event = clone_event(dbe)
         if dbe.begin.day != dbe.end.day: # If overnight, then split
             event1, event2 = split_event(event)
             add_if_applicable(events,begintime,endtime,event1)
@@ -85,23 +85,30 @@ def solve_first_date_of_week(week, year):
 def assign_to_day(event):
 	return event.begin.weekday()
 
-def temp_print_durations():
+
+def temp_get_events(username, catname, begin, end):
     from django.contrib.auth.models import User
+    the_user = None
+    cat = None
+    try:
+        the_user = User.objects.get(username__iexact=username)
+    except:
+        raise ValueError("Username %s was not found!"%username)
+    try:
+        cat = EventCategory.objects.get(name__iexact=catname, user=the_user)
+    except:
+        raise ValueError("User %s has no category %s!" % (username,catname) )
+    return get_events_for_weeks(the_user, begin, end, cat)
 
-    deg = User.objects.all()
-    koulu = EventCategory.objects.all()[2]
-
-    begin = (43,2009)
-    end = (49,2009)
-
-    events_by_weeks = get_events_for_weeks(deg, begin, end, koulu)
+def temp_print_weekly_durations(username, catname, begin=(01,2010), end=(10,2010)):
+    events_by_weeks = temp_get_events(username, catname, begin, end)
     durations_by_weeks = dict()
     for week in events_by_weeks.keys():
         print "\n\nWeek %s:" % week
         week_duration = timedelta(0)
         for event in events_by_weeks[week]:
             event_duration = event.end - event.begin
-            print "Adding %s event delta: %s" % (event, str(event_duration))
+            print "Calculating -- %s -- event delta: %s" % (event.__unicode__(), str(event_duration))
             week_duration += event_duration
         durations_by_weeks[week] = week_duration
 
@@ -114,4 +121,14 @@ def temp_print_durations():
 
     print "\nOverall duration: %s" % overall_duration
 
-
+def temp_print_csv_for_events(username, catname, begin=(01,2010), end=(10,2010)):
+    events_by_weeks = temp_get_events(username, catname, begin, end)
+    print "CSV begins:\n"
+    for week in events_by_weeks.keys():
+        for event in events_by_weeks[week]:
+            event_duration = event.end - event.begin
+            day = event.begin.strftime("%d.%m.%Y")
+            begin_hhmm = event.begin.strftime("%H:%M")
+            end_hhmm = event.end.strftime("%H:%M")
+            line = "%s;%s;%s;%s" % (day,begin_hhmm,end_hhmm,event.description)
+            print line

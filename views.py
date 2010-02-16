@@ -13,27 +13,27 @@ def solve_base():
 	return django.root + '/weekview' # XXX: Get app name from smwhere else.
 
 def index(request):
-	"""Displays "home page" of the application."""
+    """Displays "home page" of the application."""
 
-	t = loader.get_template('views/index.html')
-	c = Context({
-                'base': solve_base(),
-		'user': request.user,
-	})
-	return HttpResponse(t.render(c))
+    t = loader.get_template('views/index.html')
+    c = Context({
+        'base': solve_base(),
+        'user': request.user,
+    })
+    return HttpResponse(t.render(c))
 index = login_required(index)
 
 def image(request):
-	"""Returns PNG image as HTTP response. Uses default values in none
-	provided."""
+    """Returns PNG image as HTTP response. Uses default values in none
+    provided."""
 
-	week, year = get_week_from_request(request)
-	width, height = get_dimensions_from_request(request)
-	image = imaging.draw_image(request.user, week, year, width, height)
+    week, year = get_week_from_request(request)
+    width, height = get_dimensions_from_request(request)
+    image = imaging.draw_image(request.user, week, year, width, height)
 
-	response = HttpResponse(mimetype="image/png")
-	image.save(response, 'PNG')
-	return response
+    response = HttpResponse(mimetype="image/png")
+    image.save(response, 'PNG')
+    return response
 image = login_required(image)
 
 
